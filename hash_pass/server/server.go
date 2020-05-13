@@ -28,9 +28,10 @@ const (
 	PasswordKey = "password"
 
 	// Error messages
-	ErrInvalidId = "Error: Invalid task Id"
-	ErrPassword  = "Error: Missing or invalid password"
-	ErrShutdown  = "Service is shutting down, request rejected"
+	ErrInvalidId     = "Error: Invalid task Id"
+	ErrPassword      = "Error: Missing or invalid password"
+	ErrShutdown      = "Service is shutting down, request rejected"
+	ErrShutdownError = "Server encountered an error while shutting down: %v"
 
 	// Farewell message
 	MsgFarewell = "All requests have been processed, terminating service."
@@ -52,7 +53,7 @@ var (
 	// Server object
 	httpServer http.Server
 	// Shutdown flag
-	bShutdown bool = false
+	bShutdown = false
 )
 
 /* method delayAndUpdate()
@@ -94,7 +95,10 @@ func doHash(w http.ResponseWriter, r *http.Request) {
 		result := resultMap[id]
 		if len(result) > 0 {
 			// Output the result
-			fmt.Fprintf(w, result)
+			_, err := fmt.Fprintf(w, result)
+			if err != nil {
+				log.Printf("Error sending HTTP response: %v", err)
+			}
 		} else {
 			// No entry found for specified key
 			http.Error(w, ErrInvalidId, http.StatusBadRequest)
@@ -115,7 +119,10 @@ func doHash(w http.ResponseWriter, r *http.Request) {
 		// Fire off goroutine to do the work
 		go delayAndUpdate(num, pw)
 		// return the requestId
-		fmt.Fprintf(w, num)
+		_, err := fmt.Fprintf(w, num)
+		if err != nil {
+			log.Printf("Error sending HTTP response: %v", err)
+		}
 
 		// Update statistics
 		mtxId.Lock()
@@ -134,7 +141,7 @@ func doHash(w http.ResponseWriter, r *http.Request) {
 	method getStats()
 	Return a JSON object with the current statistics
 */
-func getStats(w http.ResponseWriter, r *http.Request) {
+func getStats(w http.ResponseWriter, _ *http.Request) {
 	// If we're shutting down we will not accept requests
 	if bShutdown {
 		http.Error(w, "Service is shutting down, request rejected", http.StatusServiceUnavailable)
@@ -159,7 +166,10 @@ func getStats(w http.ResponseWriter, r *http.Request) {
 
 	// Serialize and return the stats
 	jtext, _ := json.Marshal(stats)
-	w.Write(jtext)
+	_, err := w.Write(jtext)
+	if err != nil {
+		log.Printf("Error returning statistics: %v", err)
+	}
 }
 
 /*
@@ -168,7 +178,7 @@ func getStats(w http.ResponseWriter, r *http.Request) {
 	- Wait for any pending requests to complete
 	- Shut down the HTTP server
 */
-func doShutdown(w http.ResponseWriter, r *http.Request) {
+func doShutdown(w http.ResponseWriter, _ *http.Request) {
 	log.Printf(MsgShutdown)
 	bShutdown = true
 
@@ -188,13 +198,19 @@ func doShutdown(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with a farewell message
-	fmt.Fprintf(w, MsgFarewell)
+	_, err := fmt.Fprintf(w, MsgFarewell)
+	if err != nil {
+		log.Printf("Failed to send farewell message: %v", err)
+	}
 
 	log.Printf("Shutdown: All tasks completed")
 	// Give the server some time to send the request, then terminate it
 	go func() {
 		time.Sleep(1 * time.Second)
-		httpServer.Shutdown(nil)
+		err := httpServer.Shutdown(nil)
+		if err != http.ErrServerClosed {
+			log.Printf(ErrShutdownError, err)
+		}
 	}()
 }
 
