@@ -202,11 +202,11 @@ func doShutdown(w http.ResponseWriter, r *http.Request) {
 	method HandleRequests()
 	Server's only export.  This sets up the handlers and deploys a listening server.
 */
-func HandleRequests() {
+func StartServer(port int) {
 	http.HandleFunc(HashPath, doHash)
 	http.HandleFunc(HashPath+"/", doHash)
 	http.HandleFunc(StatsPath, getStats)
 	http.HandleFunc(ShutdownPath, doShutdown)
-	httpServer = http.Server{Addr: ":" + strconv.Itoa(ListenPort)}
+	httpServer = http.Server{Addr: ":" + strconv.Itoa(port)}
 	log.Fatal(httpServer.ListenAndServe())
 }
