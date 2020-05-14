@@ -1,3 +1,8 @@
+/*********************************************************
+File: server.go
+Contents: This file contains the API endpoint implementations and related data
+*********************************************************/
+
 package server
 
 import (

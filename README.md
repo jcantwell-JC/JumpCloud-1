@@ -7,6 +7,7 @@ API Endpoint|HTTP Method|Description
 /hash | POST | Post a request with a form field `password` with a string value.  The request will be queued for deferred processing and the API will return a task Id that can be used to fetch the results asynchronously 
 /hash/<task id>| GET | Fetch the results of a queued task.  If the task Id is invalid or the task has not completed this API will return an HTTP `Bad Request` (400) status
 /shutdown|GET|Gracefully shut down the service.  Wait for any pending tasks to complete then shut down the service and exit.  Any requests received while shutdown is in process will be failed with HTTP status `Service Unavailable` (503)
+
 Calling any of these APIs with the wrong HTTP method will result in an HTTP error status of `Method not allowed` (405) 
 
 ## Building
