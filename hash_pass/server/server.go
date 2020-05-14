@@ -146,7 +146,12 @@ func doHash(w http.ResponseWriter, r *http.Request) {
 	method getStats()
 	Return a JSON object with the current statistics
 */
-func getStats(w http.ResponseWriter, _ *http.Request) {
+func getStats(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		// Only GET method is supported
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
 	// If we're shutting down we will not accept requests
 	if bShutdown {
 		http.Error(w, "Service is shutting down, request rejected", http.StatusServiceUnavailable)
@@ -183,7 +188,14 @@ func getStats(w http.ResponseWriter, _ *http.Request) {
 	- Wait for any pending requests to complete
 	- Shut down the HTTP server
 */
-func doShutdown(w http.ResponseWriter, _ *http.Request) {
+func doShutdown(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		// Only GET method is supported
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
 	log.Printf(MsgShutdown)
 	bShutdown = true
 
