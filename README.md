@@ -16,4 +16,4 @@ Calling any of these APIs with the wrong HTTP method will result in an HTTP erro
 * Run `go build main.go`
 
 ## Running
-Typing `./main` will run the server on the default listening port 8080.  The port value can be specified on the command line, e.g. `./main 1234` will run the service listening on port 1234.  Port number must be within range 1024 < port < 65536
+Typing `./main` will run the server on the default listening port 8080.  The port value can be specified on the command line, e.g. `./main 1234` will run the service listening on port 1234.  Port number must be within range 1024 < port < 65536.
