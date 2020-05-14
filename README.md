@@ -10,8 +10,8 @@ API Endpoint|HTTP Method|Description
 
 Calling any of these APIs with the wrong HTTP method will result in an HTTP error status of `Method not allowed` (405) 
 
-## Building
-* Clone the source
+## Building (requires Go 1.14)
+* Clone the source - `git clone https://github.com/jameadows/JumpCloud.git`
 * CD into `JumpCloud/hash_pass` directory
 * Run `go build main.go`
 
