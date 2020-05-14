@@ -12,7 +12,7 @@ Calling any of these APIs with the wrong HTTP method will result in an HTTP erro
 
 ## Building
 * Clone the source
-* CD into `JumpClound/hash_pass` directory
+* CD into `JumpCloud/hash_pass` directory
 * Run `go build main.go`
 
 ## Running
