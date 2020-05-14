@@ -41,6 +41,7 @@ const (
 	// Farewell message
 	MsgFarewell = "All requests have been processed, terminating service."
 	MsgShutdown = "Initiating service shutdown"
+	
 	// Runtime constants
 	ListenPort = 8080
 	DelayTime  = 5 * time.Second
@@ -63,20 +64,25 @@ var (
 
 /* method delayAndUpdate()
 - Sleep for the required amount of time
-- Calculate SHA412 of `pword`
+- Calculate SHA512 of `pword`
 - Put result in resultMap using requestId as key
 */
 func delayAndUpdate(requestId string, pword string) {
+	// Pause before processing
 	time.Sleep(DelayTime)
+	
 	// Hash the password
 	sum := sha512.Sum512([]byte(pword))
+	
 	// Convert to Base64
 	sha := base64.URLEncoding.EncodeToString(sum[:])
+	
 	// Add to resultMap
 	mtxMap.Lock()
 	resultMap[requestId] = sha
 	mtxMap.Unlock()
-	log.Printf("Deferred processing completed for requst Id %s", requestId)
+	
+	log.Printf("Deferred processing completed for request Id %s", requestId)
 }
 
 /*
@@ -121,8 +127,10 @@ func doHash(w http.ResponseWriter, r *http.Request) {
 		requestID++
 		num := strconv.FormatInt(requestID, 10)
 		mtxId.Unlock()
+		
 		// Fire off goroutine to do the work
 		go delayAndUpdate(num, pw)
+		
 		// return the requestId
 		_, err := fmt.Fprintf(w, num)
 		if err != nil {
